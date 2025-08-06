@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  avatar    String?
+  isOnline  Boolean  @default(false)
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  initiatedChats Chat[] @relation("ChatInitiator")
+  
+  participantChats Chat[] @relation("ChatParticipant")
+  
+  messages Message[]
+  
+  readStatus MessageReadStatus[]
+
+  @@map("users")
+}
+
+model Chat {
+  id          String   @id @default(uuid())
+  initiatorId String
+  participantId String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  initiator   User @relation("ChatInitiator", fields: [initiatorId], references: [id], onDelete: Cascade)
+  participant User? @relation("ChatParticipant", fields: [participantId], references: [id], onDelete: SetNull)
+  
+  messages Message[]
+
+  @@unique([initiatorId, participantId])
+  @@map("chats")
+}
+
+model Message {
+  id        String      @id @default(uuid())
+  content   String
+  type      MessageType @default(TEXT)
+  chatId    String
+  senderId  String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender User @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  
+  readStatus MessageReadStatus[]
+
+  @@map("messages")
+}
+
+model MessageReadStatus {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@map("message_read_status")
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
