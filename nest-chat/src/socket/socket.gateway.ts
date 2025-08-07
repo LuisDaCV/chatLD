@@ -19,11 +19,9 @@ interface AuthenticatedSocket extends Socket {
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.NODE_ENV === 'production'
-      ? false
-      : 'http://localhost:5173', 
-    methods: ['GET', 'POST'],
-    credentials: true,
+    origin: '*',               
+    methods: ['GET', 'POST'], 
+    credentials: true,          
   },
 })
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {

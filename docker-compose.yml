@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: nest
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: chatdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./nest-chat
+    container_name: nest-backend
+    restart: always
+    ports:
+      - "3000:3000" 
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://nest:secret@postgres:5432/chatdb
+      NODE_ENV: production
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./react-chat
+    container_name: react-frontend
+    restart: always
+    ports:
+      - '3001:80'
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  pgdata:
+
+
+networks:
+  app-network:
+    driver: bridge
