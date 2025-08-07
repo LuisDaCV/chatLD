@@ -23,7 +23,7 @@ Aplicación de chat en tiempo real desarrollada con:
   </div>
 </div>
 
-## 🚀 Instrucciones para ejecutar el proyecto
+## Instrucciones para ejecutar el proyecto
 
 1. Clonar el repositorio:
 
